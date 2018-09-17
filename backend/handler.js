@@ -13,7 +13,7 @@ app.use(
   expressJWT({
     secret: jwt_key
   }).unless({
-    path: ['/user/login', '/user/register']
+    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/schedule/:sid', methods: ['GET'] }]
   })
 )
 app.use(function(err, req, res, next) {
@@ -23,7 +23,24 @@ app.use(function(err, req, res, next) {
 })
 
 app.get('/', (req, res) => {
+  console.log(req.user)
   res.send('Hello World!')
+})
+
+app.get('/schedule/:sid', (req, res) => {
+  res.json({ status: 'succ', sid: req.params.sid })
+})
+
+app.post('/schedule', (req, res) => {
+  res.json({ status: 'succ' })
+})
+
+app.put('/schedule/:sid', (req, res) => {
+  res.json({ status: 'succ', sid: req.params.sid })
+})
+
+app.get('/schedule/list', (req, res) => {
+  res.json({ status: 'succ' })
 })
 
 app.post('/user/login', [check('email').isEmail(), check('password').isLength({ min: 6 })], (req, res) => {
