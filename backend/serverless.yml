@@ -19,10 +19,12 @@ service: backend # NOTE: update this with your service name
 
 provider:
   name: aws
-  region: eu-west-1
+  region: us-east-1
   runtime: nodejs8.10
+  stage: dev
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    JWT_KEY: ${file(../config.${opt:stage, self:provider.stage}.yml):jwt-token}
   iamRoleStatements:
     - Effect: Allow
       Action:
