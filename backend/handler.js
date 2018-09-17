@@ -6,9 +6,11 @@ const expressJWT = require('express-jwt')
 const jwt = require('jsonwebtoken')
 const { check, validationResult } = require('express-validator/check')
 const app = express()
+const cors = require('cors')
 const jwt_key = process.env.JWT_KEY
 
 app.use(bodyParser.json({ strict: false }))
+app.use(cors())
 app.use(
   expressJWT({
     secret: jwt_key
