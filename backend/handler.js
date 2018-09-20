@@ -19,7 +19,7 @@ app.use(
   expressJWT({
     secret: jwt_key
   }).unless({
-    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/schedule/:sid', methods: ['GET'] }, { url: '/test', methods: ['GET', 'POST'] }]
+    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/test', methods: ['GET', 'POST'] }, /\/schedule\//]
   })
 )
 app.use(function(err, req, res, next) {
@@ -39,7 +39,30 @@ app.post('/test', (req, res) => {
 })
 
 app.get('/schedule/:sid', (req, res) => {
-  res.json({ status: 'succ', sid: req.params.sid })
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    KeyConditionExpression: '#pk = :pk',
+    ExpressionAttributeNames: {
+      '#pk': 'pk'
+    },
+    ExpressionAttributeValues: {
+      ':pk': 'schedule-' + req.params.sid
+    }
+  }
+
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get schedule' })
+    } else {
+      console.log('Query succeeded.')
+      if (result.Items.length == 0) {
+        res.status(404).json({ error: 'Schedule does not exist' })
+      } else {
+        res.json({ status: 'succ', data: result.Items[0] })
+      }
+    }
+  })
 })
 
 //[check('lat').isFloat(), check('lon').isFloat(), check('tz').isInt()],
@@ -86,8 +109,8 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       tz: req.body.tz
     }
   }
-  if (req.file) {
-    params.Item.background = path
+  if (path !== '') {
+    params.Item.image = path
   }
 
   dynamoDb.put(params, error => {
@@ -100,11 +123,52 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
 })
 
 app.put('/schedule/:sid', (req, res) => {
-  res.json({ status: 'succ', sid: req.params.sid })
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    Key: {
+      pk: 'schedule-' + req.params.sid
+    }
+  }
+
+  dynamoDb.get(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get user' })
+    }
+    if (result.Item) {
+      if (result.Item.password === password) {
+        res.json({ status: 'succ', token: generateJwtToken(email), email })
+      } else {
+        res.status(400).json({ error: 'Password error' })
+      }
+    } else {
+      res.status(404).json({ error: 'Email does not exist' })
+    }
+  })
 })
 
-app.get('/schedule/list', (req, res) => {
-  res.json({ status: 'succ' })
+app.get('/schedules', (req, res) => {
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    IndexName: 'GSI',
+    KeyConditionExpression: '#sk = :sk',
+    ExpressionAttributeNames: {
+      '#sk': 'sk'
+    },
+    ExpressionAttributeValues: {
+      ':sk': 'schedule-' + req.user.email
+    }
+  }
+
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get schedule' })
+    } else {
+      console.log('Query succeeded.')
+      res.json({ status: 'succ', data: result.Items })
+    }
+  })
 })
 
 app.post('/user/login', [check('email').isEmail(), check('password').isLength({ min: 6 })], (req, res) => {
