@@ -25,7 +25,12 @@ provider:
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
     JWT_KEY: ${file(../config.${opt:stage, self:provider.stage}.yml):jwt-token}
+    BUCKET: brick-matrix
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: '*'
     - Effect: Allow
       Action:
         - dynamodb:Query

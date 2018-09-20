@@ -1,9 +1,13 @@
 const serverless = require('serverless-http')
+const fileType = require('file-type')
+const AWS = require('aws-sdk')
+const md5 = require('md5')
 const bodyParser = require('body-parser')
 const express = require('express')
 const dynamoDb = require('./dynamodb')
 const expressJWT = require('express-jwt')
 const jwt = require('jsonwebtoken')
+const uuid = require('uuid')
 const { check, validationResult } = require('express-validator/check')
 const app = express()
 const cors = require('cors')
@@ -15,7 +19,7 @@ app.use(
   expressJWT({
     secret: jwt_key
   }).unless({
-    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/schedule/:sid', methods: ['GET'] }]
+    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/schedule/:sid', methods: ['GET'] }, { url: '/test', methods: ['GET', 'POST'] }]
   })
 )
 app.use(function(err, req, res, next) {
@@ -29,12 +33,70 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.post('/test', (req, res) => {
+  console.log(req.body.name)
+  res.json({ status: 'ok' })
+})
+
 app.get('/schedule/:sid', (req, res) => {
   res.json({ status: 'succ', sid: req.params.sid })
 })
 
-app.post('/schedule', (req, res) => {
-  res.json({ status: 'succ' })
+//[check('lat').isFloat(), check('lon').isFloat(), check('tz').isInt()],
+app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz').isInt()], (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ error: errors.array() })
+  }
+
+  const id = uuid.v1()
+  var path = ''
+  if (req.body.image) {
+    const buf = Buffer.from(req.body.image, 'base64')
+    const tp = fileType(buf.slice(0, 4100))
+    if (tp.mime === 'image/jpeg' || tp.mime === 'image/png') {
+      path = 'upload/' + md5(req.user.email) + '/' + id + '.' + tp.ext
+      const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
+      var s3params = {
+        Bucket: process.env.BUCKET,
+        Key: path,
+        Body: buf,
+        ACL: 'public-read',
+        ContentType: tp.mime
+      }
+      s3bucket.upload(s3params, function(err, data) {
+        if (err) {
+          return res.status(422).json({ error: 'upload to s3 error' })
+        } else {
+          console.log(data)
+        }
+      })
+    } else {
+      return res.status(422).json({ erro: 'mime type error' })
+    }
+  }
+
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    Item: {
+      pk: 'schedule-' + id,
+      sk: 'schedule-' + req.user.email,
+      lat: req.body.lat,
+      lon: req.body.lon,
+      tz: req.body.tz
+    }
+  }
+  if (req.file) {
+    params.Item.background = path
+  }
+
+  dynamoDb.put(params, error => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not create schedule' })
+    }
+    res.json({ status: 'succ', data: params.Item, id })
+  })
 })
 
 app.put('/schedule/:sid', (req, res) => {
@@ -132,4 +194,6 @@ const generateJwtToken = email => {
   )
 }
 
-module.exports.handler = serverless(app)
+module.exports.handler = serverless(app, {
+  binary: ['application/json', 'image/*']
+})
