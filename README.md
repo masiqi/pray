@@ -78,7 +78,7 @@ pray 是一个根据用户所在地区生成当前礼拜时间的工具
    > lon 必填 经度 浮点类型  
    > tz 必填 时区 整数  
    > image 可选 背景图 base64 编码后的图片
-   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
+   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
    > method 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
 
 6. 修改时刻
@@ -90,7 +90,7 @@ pray 是一个根据用户所在地区生成当前礼拜时间的工具
    > lon 必填 经度 浮点类型  
    > tz 必填 时区 整数  
    > image 可选 背景图 base64 编码后的图片
-   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
+   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
    > method 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
 7. 删除时刻
    > delete /schedule/:id  
