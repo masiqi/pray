@@ -53,7 +53,7 @@ pray 是一个根据用户所在地区生成当前礼拜时间的工具
       2. 时刻表为`schedule-` + {{ email }}
 2. GSI
    1. pk 分片键 table 中的 sk
-   2. 用来查找  指定用户创建的时刻数据
+   2. 用来查找指定用户创建的时刻数据
 
 ## API
 
@@ -78,10 +78,28 @@ pray 是一个根据用户所在地区生成当前礼拜时间的工具
    > lon 必填 经度 浮点类型  
    > tz 必填 时区 整数  
    > image 可选 背景图 base64 编码后的图片
-   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
-   > method 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
+   > lang 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
+   > cm 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
+   > imask_delta 可选 封斋时刻调节 整数 分钟  
+   > fajr_delta 可选 晨礼时刻调节 整数 分钟  
+   > sunrise_delta 可选 日出时刻调节 整数 分钟  
+   > dhuhr_delta 可选 晌礼时刻调节 整数 分钟  
+   > athan_delta 可选 邦克时刻调节 整数 分钟  
+   > jamaah_delta 可选 聚礼时刻调节 整数 分钟  
+   > asr_delta 可选 脯礼时刻调节 整数 分钟  
+   > maghrib_delta 可选 昏礼时刻调节 整数 分钟  
+   > isha_delta 可选 宵礼时刻调节 整数 分钟  
+   > imask_fixed 可选 封斋时刻调节 时刻  
+   > fajr_fixed 可选 晨礼时刻调节 时刻  
+   > sunrise_fixed 可选 日出时刻调节 时刻  
+   > dhuhr_fixed 可选 晌礼时刻调节 时刻  
+   > athan_fixed 可选 邦克时刻调节 时刻  
+   > jamaah_fixed 可选 聚礼时刻调节 时刻  
+   > asr_fixed 可选 脯礼时刻调节 时刻  
+   > maghrib_fixed 可选 昏礼时刻调节 时刻  
+   > isha_fixed 可选 宵礼时刻调节 时刻
 
-6. 修改时刻
+6) 修改时刻
    > put /schedule/sid  
    > header jwt  
    > param
@@ -90,8 +108,26 @@ pray 是一个根据用户所在地区生成当前礼拜时间的工具
    > lon 必填 经度 浮点类型  
    > tz 必填 时区 整数  
    > image 可选 背景图 base64 编码后的图片
-   > language 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
-   > method 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
-7. 删除时刻
+   > lang 可选 语言 默认为 EN 输入范围「ZH,EN,AR」  
+   > cm 可选 计时法 默认为 ISNA 输入范围「MWL,ISNA,Egypt,Makkah,Karachi,Tehran,Jafari」
+   > imask_delta 可选 封斋时刻调节 整数 分钟  
+   > fajr_delta 可选 晨礼时刻调节 整数 分钟  
+   > sunrise_delta 可选 日出时刻调节 整数 分钟  
+   > dhuhr_delta 可选 晌礼时刻调节 整数 分钟  
+   > athan_delta 可选 邦克时刻调节 整数 分钟  
+   > jamaah_delta 可选 聚礼时刻调节 整数 分钟  
+   > asr_delta 可选 脯礼时刻调节 整数 分钟  
+   > maghrib_delta 可选 昏礼时刻调节 整数 分钟  
+   > isha_delta 可选 宵礼时刻调节 整数 分钟  
+   > imask_fixed 可选 封斋时刻调节 时刻  
+   > fajr_fixed 可选 晨礼时刻调节 时刻  
+   > sunrise_fixed 可选 日出时刻调节 时刻  
+   > dhuhr_fixed 可选 晌礼时刻调节 时刻  
+   > athan_fixed 可选 邦克时刻调节 时刻  
+   > jamaah_fixed 可选 聚礼时刻调节 时刻  
+   > asr_fixed 可选 脯礼时刻调节 时刻  
+   > maghrib_fixed 可选 昏礼时刻调节 时刻  
+   > isha_fixed 可选 宵礼时刻调节 时刻
+7) 删除时刻
    > delete /schedule/:id  
    > header jwt

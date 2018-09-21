@@ -107,8 +107,26 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       lat: req.body.lat,
       lon: req.body.lon,
       tz: req.body.tz,
-      method: req.body.method || 'ISNA',
-      language: req.body.language || 'EN'
+      cm: req.body.cm || 'ISNA',
+      lang: req.body.lang || 'EN',
+      imask_delta: req.body.imask_delta || 0,
+      fajr_delta: req.body.fajr_delta || 0,
+      sunrise_delta: req.body.sunrise_delta || 0,
+      dhuhr_delta: req.body.dhuhr_delta || 0,
+      athan_delta: req.body.athan_delta || 0,
+      jamaah_delta: req.body.jamaah_delta || 0,
+      asr_delta: req.body.asr_delta || 0,
+      maghrib_delta: req.body.maghrib_delta || 0,
+      isha_delta: req.body.isha_delta || 0,
+      imask_fixed: req.body.imask_fixed || 0,
+      fajr_fixed: req.body.fajr_fixed || 0,
+      sunrise_fixed: req.body.sunrise_fixed || 0,
+      dhuhr_fixed: req.body.dhuhr_fixed || 0,
+      athan_fixed: req.body.athan_fixed || 0,
+      jamaah_fixed: req.body.jamaah_fixed || 0,
+      asr_fixed: req.body.asr_fixed || 0,
+      maghrib_fixed: req.body.maghrib_fixed || 0,
+      isha_fixed: req.body.isha_fixed || 0
     }
   }
   if (path !== '') {
@@ -146,23 +164,44 @@ app.put('/schedule/:sid', (req, res) => {
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Key: {
-      pk: 'schedule-' + req.params.sid
-    }
+      pk: 'schedule-' + req.params.sid,
+      sk: 'schedule-' + req.user.email
+    },
+    UpdateExpression: 'set lat=:lat, lon=:lon, tz=:tz, cm=:cm, lang=:lang, imask_delta=:imask_delta, fajr_delta=:fajr_delta, sunrise_delta=:sunrise_delta, dhuhr_delta=:dhuhr_delta, athan_delta=:athan_delta, jamaah_delta=:jamaah_delta, asr_delta=:asr_delta, maghrib_delta=:maghrib_delta, isha_delta=:isha_delta, imask_fixed=:imask_fixed, fajr_fixed=:fajr_fixed, sunrise_fixed=:sunrise_fixed, dhuhr_fixed=:dhuhr_fixed, athan_fixed=:athan_fixed, jamaah_fixed=:jamaah_fixed, asr_fixed=:asr_fixed, maghrib_fixed=:maghrib_fixed, isha_fixed=:isha_fixed',
+    ExpressionAttributeValues: {
+      ':lat': req.body.lat,
+      ':lon': req.body.lon,
+      ':tz': req.body.tz,
+      ':cm': req.body.cm || 'ISNA',
+      ':lang': req.body.lang || 'EN',
+      ':imask_delta': req.body.imask_delta || 0,
+      ':fajr_delta': req.body.fajr_delta || 0,
+      ':sunrise_delta': req.body.sunrise_delta || 0,
+      ':dhuhr_delta': req.body.dhuhr_delta || 0,
+      ':athan_delta': req.body.athan_delta || 0,
+      ':jamaah_delta': req.body.jamaah_delta || 0,
+      ':asr_delta': req.body.asr_delta || 0,
+      ':maghrib_delta': req.body.maghrib_delta || 0,
+      ':isha_delta': req.body.isha_delta || 0,
+      ':imask_fixed': req.body.imask_fixed || 0,
+      ':fajr_fixed': req.body.fajr_fixed || 0,
+      ':sunrise_fixed': req.body.sunrise_fixed || 0,
+      ':dhuhr_fixed': req.body.dhuhr_fixed || 0,
+      ':athan_fixed': req.body.athan_fixed || 0,
+      ':jamaah_fixed': req.body.jamaah_fixed || 0,
+      ':asr_fixed': req.body.asr_fixed || 0,
+      ':maghrib_fixed': req.body.maghrib_fixed || 0,
+      ':isha_fixed': req.body.isha_fixed || 0
+    },
+    ReturnValues: 'UPDATED_NEW'
   }
 
-  dynamoDb.get(params, (error, result) => {
+  dynamoDb.update(params, (error, result) => {
     if (error) {
       console.log(error)
-      res.status(400).json({ error: 'Could not get user' })
-    }
-    if (result.Item) {
-      if (result.Item.password === password) {
-        res.json({ status: 'succ', token: generateJwtToken(email), email })
-      } else {
-        res.status(400).json({ error: 'Password error' })
-      }
+      res.status(400).json({ error: 'Could not update schedule' })
     } else {
-      res.status(404).json({ error: 'Email does not exist' })
+      res.json({ status: 'succ', data: result.Attributes, id: req.params.sid })
     }
   })
 })
