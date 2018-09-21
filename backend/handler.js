@@ -19,7 +19,7 @@ app.use(
   expressJWT({
     secret: jwt_key
   }).unless({
-    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/test', methods: ['GET', 'POST'] }, /\/schedule\//]
+    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/test', methods: ['GET', 'POST'] }, { url: /\/schedule\//, methods: ['GET'] }]
   })
 )
 app.use(function(err, req, res, next) {
@@ -119,6 +119,24 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       res.status(400).json({ error: 'Could not create schedule' })
     }
     res.json({ status: 'succ', data: params.Item, id })
+  })
+})
+
+app.delete('/schedule/:sid', (req, res) => {
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    Key: {
+      pk: 'schedule-' + req.params.sid,
+      sk: 'schedule-' + req.user.email
+    }
+  }
+
+  dynamoDb.delete(params, function(err, result) {
+    if (err) {
+      res.status(400).json({ error: 'Could not delete schedule' })
+    } else {
+      res.json({ status: 'succ' })
+    }
   })
 })
 
