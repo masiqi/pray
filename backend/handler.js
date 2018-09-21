@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
 })
 
 app.post('/test', (req, res) => {
-  console.log(req.body.name)
+  console.log(req.body.name || 'abcd')
   res.json({ status: 'ok' })
 })
 
@@ -106,7 +106,9 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       sk: 'schedule-' + req.user.email,
       lat: req.body.lat,
       lon: req.body.lon,
-      tz: req.body.tz
+      tz: req.body.tz,
+      method: req.body.method || 'ISNA',
+      language: req.body.language || 'EN'
     }
   }
   if (path !== '') {
