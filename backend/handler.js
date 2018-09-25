@@ -317,6 +317,4 @@ const generateJwtToken = email => {
   )
 }
 
-module.exports.handler = serverless(app, {
-  binary: ['application/json', 'image/*']
-})
+module.exports.handler = serverless(app)
