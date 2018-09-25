@@ -43,12 +43,9 @@ export const constantRouterMap = [
   {
     path: '/schedule',
     component: Layout,
-    redirect: '/schedule/table',
-    name: 'Schedule',
-    meta: { title: 'Example', icon: 'example' },
     children: [
       {
-        path: 'table',
+        path: 'index',
         name: 'Schedule',
         component: () => import('@/views/table/index'),
         meta: { title: 'Schedule', icon: 'table' }
