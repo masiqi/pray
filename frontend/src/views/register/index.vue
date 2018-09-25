@@ -1,9 +1,9 @@
 <template>
-  <div class="login-container">
-    <el-form ref="loginForm"
-             :model="loginForm"
-             :rules="loginRules"
-             class="login-form"
+  <div class="register-container">
+    <el-form ref="registerForm"
+             :model="registerForm"
+             :rules="registerRules"
+             class="register-form"
              auto-complete="on"
              label-position="left">
       <h3 class="title">vue-admin-template</h3>
@@ -11,7 +11,7 @@
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
-        <el-input v-model="loginForm.email"
+        <el-input v-model="registerForm.email"
                   name="email"
                   type="text"
                   auto-complete="on"
@@ -22,11 +22,11 @@
           <svg-icon icon-class="password" />
         </span>
         <el-input :type="pwdType"
-                  v-model="loginForm.password"
+                  v-model="registerForm.password"
                   name="password"
                   auto-complete="on"
                   placeholder="password"
-                  @keyup.enter.native="handleLogin" />
+                  @keyup.enter.native="handleregister" />
         <span class="show-pwd"
               @click="showPwd">
           <svg-icon icon-class="eye" />
@@ -36,12 +36,12 @@
         <el-button :loading="loading"
                    type="primary"
                    style="width:100%;"
-                   @click.native.prevent="handleLogin">
-          Sign in
+                   @click.native.prevent="handleregister">
+          Register
         </el-button>
       </el-form-item>
       <div class="tips">
-        <router-link :to="{ path: 'register'}">register</router-link>
+        <router-link :to="{ path: 'login'}">login</router-link>
       </div>
     </el-form>
   </div>
@@ -49,7 +49,7 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: 'Register',
   data() {
     const validatePass = (rule, value, callback) => {
       if (value.length < 6) {
@@ -59,11 +59,11 @@ export default {
       }
     }
     return {
-      loginForm: {
+      registerForm: {
         email: 'masiqi@gmail.com',
         password: '123qwe'
       },
-      loginRules: {
+      registerRules: {
         email: [{ required: true, trigger: 'blur' }],
         password: [{ required: true, trigger: 'blur', validator: validatePass }]
       },
@@ -88,12 +88,12 @@ export default {
         this.pwdType = 'password'
       }
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+    handleregister() {
+      this.$refs.registerForm.validate(valid => {
         if (valid) {
           this.loading = true
           this.$store
-            .dispatch('Login', this.loginForm)
+            .dispatch('Register', this.registerForm)
             .then(() => {
               this.loading = false
               this.$router.push({ path: this.redirect || '/' })
@@ -116,7 +116,7 @@ $bg: #2d3a4b;
 $light_gray: #eee;
 
 /* reset element-ui css */
-.login-container {
+.register-container {
   .el-input {
     display: inline-block;
     height: 47px;
@@ -148,12 +148,12 @@ $light_gray: #eee;
 $bg: #2d3a4b;
 $dark_gray: #889aa4;
 $light_gray: #eee;
-.login-container {
+.register-container {
   position: fixed;
   height: 100%;
   width: 100%;
   background-color: $bg;
-  .login-form {
+  .register-form {
     position: absolute;
     left: 0;
     right: 0;
