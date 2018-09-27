@@ -15,11 +15,45 @@
                      value="HANS" />
         </el-select>
       </el-form-item>
+      <el-form-item label="Method">
+        <el-select v-model="form.cm"
+                   :default-first-option="true"
+                   placeholder="please select your calculate method">
+          <el-option label="MWL"
+                     value="MWL" />
+          <el-option label="ISNA"
+                     value="ISNA" />
+          <el-option label="Egypt"
+                     value="Egypt" />
+          <el-option label="Makkah"
+                     value="Makkah" />
+          <el-option label="Karachi"
+                     value="Karachi" />
+          <el-option label="Tehran"
+                     value="Tehran" />
+          <el-option label="Jafari"
+                     value="Jafari" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="Latitude">
         <el-input v-model="form.lat" />
       </el-form-item>
       <el-form-item label="Longitude">
         <el-input v-model="form.lon" />
+      </el-form-item>
+      <el-form-item label="Background">
+        <el-upload :on-change="handleChange"
+                   :file-list="fileList"
+                   :multiple="false"
+                   :auto-upload="false"
+                   class="upload-demo"
+                   accept="image/jpeg,image/png"
+                   action="">
+          <el-button size="small"
+                     type="primary">upload</el-button>
+          <div slot="tip"
+               class="el-upload__tip">jpeg/png only, max size 500kb</div>
+        </el-upload>
       </el-form-item>
       <el-form-item label="Instant delivery">
         <el-switch v-model="form.delivery" />
@@ -56,14 +90,17 @@
 </template>
 
 <script>
+import { createSchedule } from '@/api/table'
 export default {
   data() {
     return {
+      fileList: [],
       form: {
         tz: 0 - new Date().getTimezoneOffset() / 60,
         lang: '',
         lat: '',
         lon: '',
+        image: '',
         region: '',
         date1: '',
         date2: '',
@@ -85,13 +122,29 @@ export default {
   },
   methods: {
     onSubmit() {
-      this.$message('submit!')
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          createSchedule({ tz: this.form.tz, lon: this.form.lon, lat: this.form.lat, lang: this.form.lang, image: this.form.image }).then(() => {})
+        }
+      })
     },
     onCancel() {
       this.$message({
         message: 'cancel!',
         type: 'warning'
       })
+    },
+    handleChange(file, fileList) {
+      var This = this
+      var reader = new FileReader()
+      reader.readAsDataURL(file.raw)
+      reader.onload = function(e) {
+        this.result // 这个就是base64编码了
+        This.form.image = this.result.split(',')[1]
+      }
+    },
+    beforeRemove(file, fileList) {
+      return this.$confirm(`确定移除 ${file.name}？`)
     }
   }
 }
