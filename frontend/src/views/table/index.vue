@@ -33,6 +33,20 @@
           {{ scope.row.cm }}
         </template>
       </el-table-column>
+      <el-table-column align="center"
+                       label="Action"
+                       width="230"
+                       class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button type="primary"
+                     size="mini"
+                     @click="handleUpdate(scope.row)">edit</el-button>
+          <el-button size="mini"
+                     type="danger"
+                     @click="handleDelete(scope.row,'deleted')">delete
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
@@ -67,7 +81,9 @@ export default {
         this.list = response.data
         this.listLoading = false
       })
-    }
+    },
+    handleUpdate(row) {},
+    handleDelete(row) {}
   }
 }
 </script>
