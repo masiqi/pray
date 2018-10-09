@@ -22,9 +22,11 @@ provider:
   region: us-east-1
   runtime: nodejs8.10
   stage: dev
+  memorySize: 128
+  timeout: 15
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
-    JWT_KEY: ${file(../config.${opt:stage, self:provider.stage}.yml):jwt-token}
+    JWT_KEY: ${file(config.${opt:stage, self:provider.stage}.yml):jwt-token}
     BUCKET: brick-matrix
   iamRoleStatements:
     - Effect: Allow
@@ -112,13 +114,3 @@ resources:
               ReadCapacityUnits: '1'
               WriteCapacityUnits: '1'
 
-plugins:
-  - serverless-dynamodb-local
-  - serverless-offline
-
-custom:
-  dynamodb:
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
