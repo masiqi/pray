@@ -16,9 +16,24 @@ export function createSchedule(params) {
   })
 }
 
+export function updateSchedule(data, params) {
+  return request({
+    url: '/schedule/' + data,
+    method: 'put',
+    data: params
+  })
+}
+
 export function deleteSchedule(data) {
   return request({
     url: '/schedule/' + data,
     method: 'delete'
+  })
+}
+
+export function getSchedule(data) {
+  return request({
+    url: '/schedule/' + data,
+    method: 'get'
   })
 }

@@ -27,6 +27,13 @@ export const constantRouterMap = [
   { path: '/404', component: () => import('@/views/404'), hidden: true },
 
   {
+    path: '/show/:pk',
+    name: 'Show',
+    hidden: true,
+    component: () => import('@/views/show/index')
+  },
+
+  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -62,6 +69,13 @@ export const constantRouterMap = [
         name: 'Form',
         component: () => import('@/views/form/index'),
         meta: { title: 'Create', icon: 'form' }
+      },
+      {
+        path: 'edit',
+        name: 'Edit',
+        hidden: true,
+        component: () => import('@/views/form/edit'),
+        meta: { title: 'Edit', icon: 'form' }
       }
     ]
   },

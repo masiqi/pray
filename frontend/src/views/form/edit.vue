@@ -135,7 +135,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary"
-                   @click="onSubmit">Create</el-button>
+                   @click="onSubmit">Update</el-button>
         <el-button @click="onCancel">Cancel</el-button>
       </el-form-item>
     </el-form>
@@ -143,15 +143,16 @@
 </template>
 
 <script>
-import { createSchedule } from '@/api/table'
+import { getSchedule, updateSchedule } from '@/api/table'
 import PrayTimes from 'prayer-times'
 
 export default {
   data() {
     return {
       fileList: [],
+      loding: false,
       form: {
-        tz: 0 - new Date().getTimezoneOffset() / 60,
+        tz: 0,
         lang: '',
         lat: '',
         lon: '',
@@ -163,6 +164,8 @@ export default {
         fajr_delta: '',
         sunrise_delta: '',
         dhuhr_delta: '',
+        athan_delta: '',
+        jamaah_delta: '',
         asr_delta: '',
         maghrib_delta: '',
         isha_delta: '',
@@ -170,12 +173,15 @@ export default {
         fajr_fixed: '',
         sunrise_fixed: '',
         dhuhr_fixed: '',
+        athan_fixed: '',
+        jamaah_fixed: '',
         asr_fixed: '',
         maghrib_fixed: '',
         isha_fixed: ''
       }
     }
   },
+
   computed: {
     imask: function() {
       if (this.form.lat !== '' && this.form.lon !== '') {
@@ -248,23 +254,46 @@ export default {
       }
     }
   },
-  mounted: function() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
-        this.position = position.coords
-        this.form.lat = this.position.latitude
-        this.form.lon = this.position.longitude
-      })
-    }
+  created() {
+    this.getDetail()
   },
   methods: {
+    getDetail() {
+      this.loading = true
+      getSchedule(this.$route.params.pk).then(response => {
+        console.log(response)
+        this.form.tz = response.data.tz
+        this.form.lang = response.data.lang
+        this.form.lat = response.data.lat
+        this.form.lon = response.data.lon
+        this.form.image = response.data.image
+        this.form.cm = response.data.cm
+        this.form.athan = response.data.athan
+        this.form.jamaah = response.data.jamaah
+        this.form.imask_delta = response.data.imask_delta
+        this.form.fajr_delta = response.data.fajr_delta
+        this.form.sunrise_delta = response.data.sunrise_delta
+        this.form.dhuhr_delta = response.data.dhuhr_delta
+        this.form.asr_delta = response.data.asr_delta
+        this.form.maghrib_delta = response.data.maghrib_delta
+        this.form.isha_delta = response.data.isha_delta
+        this.form.imask_fixed = response.data.imask_fixed
+        this.form.fajr_fixed = response.data.fajr_fixed
+        this.form.sunrise_fixed = response.data.sunrise_fixed
+        this.form.dhuhr_fixed = response.data.dhuhr_fixed
+        this.form.asr_fixed = response.data.asr_fixed
+        this.form.maghrib_fixed = response.data.maghrib_fixed
+        this.form.isha_fixed = response.data.isha_fixed
+      })
+      this.loading = false
+    },
     onSubmit() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          createSchedule({ cm: this.form.cm, tz: this.form.tz, lon: this.form.lon, lat: this.form.lat, lang: this.form.lang, image: this.form.image, athan: this.form.athan, jamaah: this.form.jamaah, imask_delta: this.form.imask_delta, fajr_delta: this.form.fajr_delta, sunrise_delta: this.form.sunrise_delta, dhuhr_delta: this.form.dhuhr_delta, asr_delta: this.form.asr_delta, maghrib_delta: this.form.maghrib_delta, isha_delta: this.form.isha_delta, imask_fixed: this.form.imask_fixed, fajr_fixed: this.form.fajr_fixed, sunrise_fixed: this.form.sunrise_fixed, dhuhr_fixed: this.form.dhuhr_fixed, asr_fixed: this.form.asr_fixed, maghrib_fixed: this.form.maghrib_fixed, isha_fixed: this.form.isha_fixed }).then(() => {
+          updateSchedule(this.$route.params.pk, { cm: this.form.cm, tz: this.form.tz, lon: this.form.lon, lat: this.form.lat, lang: this.form.lang, image: this.form.image, athan: this.form.athan, jamaah: this.form.jamaah, imask_delta: this.form.imask_delta, fajr_delta: this.form.fajr_delta, sunrise_delta: this.form.sunrise_delta, dhuhr_delta: this.form.dhuhr_delta, asr_delta: this.form.asr_delta, maghrib_delta: this.form.maghrib_delta, isha_delta: this.form.isha_delta, imask_fixed: this.form.imask_fixed, fajr_fixed: this.form.fajr_fixed, sunrise_fixed: this.form.sunrise_fixed, dhuhr_fixed: this.form.dhuhr_fixed, asr_fixed: this.form.asr_fixed, maghrib_fixed: this.form.maghrib_fixed, isha_fixed: this.form.isha_fixed }).then(() => {
             this.$notify({
               title: '成功',
-              message: '创建成功',
+              message: '更新成功',
               type: 'success',
               duration: 2000
             })

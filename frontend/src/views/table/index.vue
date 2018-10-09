@@ -38,12 +38,14 @@
                        width="280"
                        class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary"
-                     size="mini"
-                     @click="handleUpdate(scope.row)">edit</el-button>
-          <el-button size="mini"
-                     type="info"
-                     @click="handleDelete(scope.row,'deleted')">show</el-button>
+          <router-link :to="{ name: 'Edit', params: { pk: scope.row.pk.split('schedule-')[1]}}">
+            <el-button type="primary"
+                       size="mini">edit</el-button>
+          </router-link>
+          <router-link :to="{ name: 'Show', params: { pk: scope.row.pk.split('schedule-')[1]}}">
+            <el-button size="mini"
+                       type="info">show</el-button>
+          </router-link>
           <el-button size="mini"
                      type="danger"
                      @click="handleDelete(scope.row,'deleted')">delete
@@ -85,7 +87,6 @@ export default {
         this.listLoading = false
       })
     },
-    handleUpdate(row) {},
     handleDelete(row) {
       deleteSchedule(row.pk.split('schedule-')[1]).then(res => {
         this.$notify({
