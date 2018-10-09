@@ -6,7 +6,7 @@
              class="login-form"
              auto-complete="on"
              label-position="left">
-      <h3 class="title">vue-admin-template</h3>
+      <h3 class="title">Pray Schedule</h3>
       <el-form-item prop="email">
         <span class="svg-container">
           <svg-icon icon-class="user" />

@@ -11,6 +11,7 @@ const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const S3Plugin = require('webpack-s3-plugin')
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir)
@@ -55,7 +56,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       template: 'index.html',
       inject: true,
       favicon: resolve('favicon.ico'),
-      title: 'vue-admin-template',
+      title: 'Pray Schedule',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -68,7 +69,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       // matter anyway
     }),
     new ScriptExtHtmlWebpackPlugin({
-      //`runtime` must same as runtimeChunk name. default is `runtime`
+      // `runtime` must same as runtimeChunk name. default is `runtime`
       inline: /runtime\..*\.js$/
     }),
     // keep chunk.id stable when chunk has no name
@@ -97,7 +98,18 @@ const webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       }
-    ])
+    ]),
+    new S3Plugin({
+      // s3Options are required
+      s3Options: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: 'us-west-1'
+      },
+      s3UploadOptions: {
+        Bucket: 'pray-wiki'
+      }
+    })
   ],
   optimization: {
     splitChunks: {
@@ -142,9 +154,7 @@ if (config.build.productionGzip) {
     new CompressionWebpackPlugin({
       asset: '[path].gz[query]',
       algorithm: 'gzip',
-      test: new RegExp(
-        '\\.(' + config.build.productionGzipExtensions.join('|') + ')$'
-      ),
+      test: new RegExp('\\.(' + config.build.productionGzipExtensions.join('|') + ')$'),
       threshold: 10240,
       minRatio: 0.8
     })
@@ -152,8 +162,7 @@ if (config.build.productionGzip) {
 }
 
 if (config.build.generateAnalyzerReport || config.build.bundleAnalyzerReport) {
-  const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-    .BundleAnalyzerPlugin
+  const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
   if (config.build.bundleAnalyzerReport) {
     webpackConfig.plugins.push(

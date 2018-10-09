@@ -19,7 +19,7 @@ app.use(
   expressJWT({
     secret: jwt_key
   }).unless({
-    path: [{ url: '/user/login', methods: ['POST'] }, { url: '/user/register', methods: ['POST'] }, { url: '/test', methods: ['GET', 'POST'] }, { url: /\/schedule\//, methods: ['GET'] }]
+    path: [{ url: /\/user\/login$/, methods: ['POST'] }, { url: /\/user\/register$/, methods: ['POST'] }, { url: '/test', methods: ['GET', 'POST'] }, { url: /\/schedule\//, methods: ['GET'] }]
   })
 )
 app.use(function(err, req, res, next) {
