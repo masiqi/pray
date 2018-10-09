@@ -41,7 +41,9 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+      Resource:
+        - 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+        - 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/*'
 
 # you can overwrite defaults here
 #  stage: dev
@@ -113,4 +115,3 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: '1'
               WriteCapacityUnits: '1'
-

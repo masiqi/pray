@@ -1,5 +1,5 @@
 'use strict'
 module.exports = {
   NODE_ENV: '"production"',
-  BASE_API: '"https://api.pray.wiki/v1/"'
+  BASE_API: '"https://api.pray.wiki/"'
 }
