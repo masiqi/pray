@@ -15,3 +15,10 @@ export function createSchedule(params) {
     data: params
   })
 }
+
+export function deleteSchedule(data) {
+  return request({
+    url: '/schedule/' + data,
+    method: 'delete'
+  })
+}

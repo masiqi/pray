@@ -35,12 +35,15 @@
       </el-table-column>
       <el-table-column align="center"
                        label="Action"
-                       width="230"
+                       width="280"
                        class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary"
                      size="mini"
                      @click="handleUpdate(scope.row)">edit</el-button>
+          <el-button size="mini"
+                     type="info"
+                     @click="handleDelete(scope.row,'deleted')">show</el-button>
           <el-button size="mini"
                      type="danger"
                      @click="handleDelete(scope.row,'deleted')">delete
@@ -52,7 +55,7 @@
 </template>
 
 <script>
-import { listSchedule } from '@/api/table'
+import { listSchedule, deleteSchedule } from '@/api/table'
 
 export default {
   filters: {
@@ -83,7 +86,18 @@ export default {
       })
     },
     handleUpdate(row) {},
-    handleDelete(row) {}
+    handleDelete(row) {
+      deleteSchedule(row.pk.split('schedule-')[1]).then(res => {
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        const index = this.list.indexOf(row)
+        this.list.splice(index, 1)
+      })
+    }
   }
 }
 </script>
