@@ -60,8 +60,8 @@ export default {
     }
     return {
       registerForm: {
-        email: 'masiqi@gmail.com',
-        password: '123qwe'
+        email: '',
+        password: ''
       },
       registerRules: {
         email: [{ required: true, trigger: 'blur' }],

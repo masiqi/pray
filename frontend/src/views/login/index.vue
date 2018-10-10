@@ -60,8 +60,8 @@ export default {
     }
     return {
       loginForm: {
-        email: 'masiqi@gmail.com',
-        password: '123qwe'
+        email: '',
+        password: ''
       },
       loginRules: {
         email: [{ required: true, trigger: 'blur' }],
