@@ -46,16 +46,23 @@
       <el-form-item label="Background">
         <el-upload :on-change="handleChange"
                    :file-list="fileList"
-                   :multiple="false"
                    :auto-upload="false"
+                   :on-preview="handlePictureCardPreview"
+                   :on-remove="handleRemove"
+                   :before-remove="beforeRemove"
+                   list-type="picture-card"
                    class="upload-demo"
                    accept="image/jpeg,image/png"
                    action="">
-          <el-button size="small"
-                     type="primary">upload</el-button>
+          <i class="el-icon-plus" />
           <div slot="tip"
                class="el-upload__tip">jpeg/png only, max size 500kb</div>
         </el-upload>
+        <el-dialog :visible.sync="dialogVisible">
+          <img :src="dialogImageUrl"
+               width="100%"
+               alt="">
+        </el-dialog>
       </el-form-item>
       <el-form-item label="imask">
         <el-input v-model="imask"
@@ -149,6 +156,8 @@ import PrayTimes from 'prayer-times'
 export default {
   data() {
     return {
+      dialogImageUrl: '',
+      dialogVisible: false,
       fileList: [],
       loding: false,
       form: {
@@ -284,6 +293,11 @@ export default {
         this.form.asr_fixed = response.data.asr_fixed
         this.form.maghrib_fixed = response.data.maghrib_fixed
         this.form.isha_fixed = response.data.isha_fixed
+        if (response.data.image) {
+          response.data.image.forEach(element => {
+            this.fileList.push({ url: process.env.CDN_URL + element })
+          })
+        }
       })
       this.loading = false
     },
@@ -309,15 +323,22 @@ export default {
     },
     handleChange(file, fileList) {
       var This = this
+      This.fileList = fileList
       var reader = new FileReader()
       reader.readAsDataURL(file.raw)
       reader.onload = function(e) {
-        this.result // 这个就是base64编码了
         This.form.image = this.result.split(',')[1]
       }
     },
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
     beforeRemove(file, fileList) {
       return this.$confirm(`确定移除 ${file.name}？`)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
     }
   }
 }
