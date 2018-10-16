@@ -44,18 +44,26 @@
         <el-input v-model="form.lon" />
       </el-form-item>
       <el-form-item label="Background">
+
         <el-upload :on-change="handleChange"
                    :file-list="fileList"
-                   :multiple="false"
                    :auto-upload="false"
+                   :on-preview="handlePictureCardPreview"
+                   :on-remove="handleRemove"
+                   :before-remove="beforeRemove"
+                   list-type="picture-card"
                    class="upload-demo"
                    accept="image/jpeg,image/png"
                    action="">
-          <el-button size="small"
-                     type="primary">upload</el-button>
+          <i class="el-icon-plus" />
           <div slot="tip"
                class="el-upload__tip">jpeg/png only, max size 500kb</div>
         </el-upload>
+        <el-dialog :visible.sync="dialogVisible">
+          <img :src="dialogImageUrl"
+               width="100%"
+               alt="">
+        </el-dialog>
       </el-form-item>
       <el-form-item label="imask">
         <el-input v-model="imask"
@@ -149,7 +157,10 @@ import PrayTimes from 'prayer-times'
 export default {
   data() {
     return {
+      dialogImageUrl: '',
+      dialogVisible: false,
       fileList: [],
+      images: [],
       form: {
         tz: 0 - new Date().getTimezoneOffset() / 60,
         lang: '',
@@ -258,10 +269,26 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
+    async onSubmit() {
+      const files = this.fileList
+      const uploadList = []
+      console.log(files)
+
+      const readFileAsync = file =>
+        new Promise(resolve => {
+          const reader = new FileReader()
+          reader.onload = evt => resolve(evt.target.result.split(',')[1])
+          reader.readAsDataURL(file.raw)
+        })
+
+      for (let i = 0; i < files.length; i++) {
+        uploadList.push(await readFileAsync(files[i]))
+      }
+
+      console.log(uploadList)
       this.$refs.form.validate(valid => {
         if (valid) {
-          createSchedule({ cm: this.form.cm, tz: this.form.tz, lon: this.form.lon, lat: this.form.lat, lang: this.form.lang, image: this.form.image, athan: this.form.athan, jamaah: this.form.jamaah, imask_delta: this.form.imask_delta, fajr_delta: this.form.fajr_delta, sunrise_delta: this.form.sunrise_delta, dhuhr_delta: this.form.dhuhr_delta, asr_delta: this.form.asr_delta, maghrib_delta: this.form.maghrib_delta, isha_delta: this.form.isha_delta, imask_fixed: this.form.imask_fixed, fajr_fixed: this.form.fajr_fixed, sunrise_fixed: this.form.sunrise_fixed, dhuhr_fixed: this.form.dhuhr_fixed, asr_fixed: this.form.asr_fixed, maghrib_fixed: this.form.maghrib_fixed, isha_fixed: this.form.isha_fixed }).then(() => {
+          createSchedule({ cm: this.form.cm, tz: this.form.tz, lon: this.form.lon, lat: this.form.lat, lang: this.form.lang, image: uploadList, athan: this.form.athan, jamaah: this.form.jamaah, imask_delta: this.form.imask_delta, fajr_delta: this.form.fajr_delta, sunrise_delta: this.form.sunrise_delta, dhuhr_delta: this.form.dhuhr_delta, asr_delta: this.form.asr_delta, maghrib_delta: this.form.maghrib_delta, isha_delta: this.form.isha_delta, imask_fixed: this.form.imask_fixed, fajr_fixed: this.form.fajr_fixed, sunrise_fixed: this.form.sunrise_fixed, dhuhr_fixed: this.form.dhuhr_fixed, asr_fixed: this.form.asr_fixed, maghrib_fixed: this.form.maghrib_fixed, isha_fixed: this.form.isha_fixed }).then(() => {
             this.$notify({
               title: '成功',
               message: '创建成功',
@@ -280,15 +307,22 @@ export default {
     },
     handleChange(file, fileList) {
       var This = this
+      This.fileList = fileList
       var reader = new FileReader()
       reader.readAsDataURL(file.raw)
       reader.onload = function(e) {
-        this.result // 这个就是base64编码了
         This.form.image = this.result.split(',')[1]
       }
     },
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
     beforeRemove(file, fileList) {
       return this.$confirm(`确定移除 ${file.name}？`)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
     }
   }
 }

@@ -72,31 +72,34 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
     return res.status(422).json({ error: errors.array() })
   }
 
-  const id = uuid.v1()
-  var path = ''
+  var id = uuid.v1()
+  var pathList = []
   if (req.body.image) {
-    const buf = Buffer.from(req.body.image, 'base64')
-    const tp = fileType(buf.slice(0, 4100))
-    if (tp.mime === 'image/jpeg' || tp.mime === 'image/png') {
-      path = 'upload/' + md5(req.user.email) + '/' + id + '.' + tp.ext
-      const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
-      var s3params = {
-        Bucket: process.env.BUCKET,
-        Key: path,
-        Body: buf,
-        ACL: 'public-read',
-        ContentType: tp.mime
-      }
-      s3bucket.upload(s3params, function(err, data) {
-        if (err) {
-          return res.status(422).json({ error: 'upload to s3 error' })
-        } else {
-          console.log(data)
+    req.body.image.forEach(element => {
+      const buf = Buffer.from(element, 'base64')
+      const tp = fileType(buf.slice(0, 4100))
+      if (tp.mime === 'image/jpeg' || tp.mime === 'image/png') {
+        path = 'upload/' + md5(req.user.email) + '/' + uuid.v1 + '.' + tp.ext
+        pathList.push(path)
+        const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
+        var s3params = {
+          Bucket: process.env.BUCKET,
+          Key: path,
+          Body: buf,
+          ACL: 'public-read',
+          ContentType: tp.mime
         }
-      })
-    } else {
-      return res.status(422).json({ erro: 'mime type error' })
-    }
+        s3bucket.upload(s3params, function(err, data) {
+          if (err) {
+            return res.status(422).json({ error: 'upload to s3 error' })
+          } else {
+            console.log(data)
+          }
+        })
+      } else {
+        return res.status(422).json({ erro: 'mime type error' })
+      }
+    })
   }
 
   const params = {
@@ -128,7 +131,7 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
     }
   }
   if (path !== '') {
-    params.Item.image = path
+    params.Item.image = pathList
   }
 
   dynamoDb.put(params, error => {
