@@ -13,7 +13,7 @@ const app = express()
 const cors = require('cors')
 const jwt_key = process.env.JWT_KEY
 
-app.use(bodyParser.json({ strict: false }))
+app.use(bodyParser.json({ strict: false, limit: '50mb' }))
 app.use(cors())
 app.use(
   expressJWT({
@@ -79,8 +79,9 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       const buf = Buffer.from(element, 'base64')
       const tp = fileType(buf.slice(0, 4100))
       if (tp.mime === 'image/jpeg' || tp.mime === 'image/png') {
-        path = 'upload/' + md5(req.user.email) + '/' + uuid.v1 + '.' + tp.ext
+        path = 'upload/' + md5(req.user.email) + '/' + uuid.v1() + '.' + tp.ext
         pathList.push(path)
+        console.log(path)
         const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
         var s3params = {
           Bucket: process.env.BUCKET,
@@ -91,6 +92,8 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
         }
         s3bucket.upload(s3params, function(err, data) {
           if (err) {
+            console.log(path)
+            console.log(err)
             return res.status(422).json({ error: 'upload to s3 error' })
           } else {
             console.log(data)
