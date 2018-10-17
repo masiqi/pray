@@ -65,6 +65,155 @@ app.get('/schedule/:sid', (req, res) => {
   })
 })
 
+app.delete('/image/:sid', (req, res) => {
+  // 取时刻表， 删除s3 object，更新dynamoDB中sid的image值
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    KeyConditionExpression: '#pk = :pk',
+    ExpressionAttributeNames: {
+      '#pk': 'pk'
+    },
+    ExpressionAttributeValues: {
+      ':pk': 'schedule-' + req.params.sid
+    }
+  }
+
+  // const entry = req.body.url.replace('https://pray.wiki/', '')
+  const entry = req.body.url.replace(process.env.CDN, '')
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get schedule' })
+    } else {
+      if (result.Items.length == 0) {
+        res.status(404).json({ error: 'Schedule does not exist' })
+      } else {
+        var found = false
+        result.Items[0].image.forEach(element => {
+          if (element === entry) {
+            if (element.split('/')[1] === md5(req.user.email)) {
+              found = true
+            }
+          }
+        })
+        if (found === true) {
+          const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
+          var s3params = {
+            Bucket: process.env.BUCKET,
+            Delete: {
+              Objects: [
+                {
+                  Key: entry
+                }
+              ]
+            }
+          }
+          s3bucket.deleteObjects(s3params, function(err, data) {
+            if (err) console.log(err, err.stack)
+            // an error occurred
+            else console.log(data)
+          })
+          const images = result.Items[0].image
+          if (images.findIndex(key => key === entry) !== -1) {
+            images.splice(images.findIndex(key => key === entry), 1)
+          }
+          const params = {
+            TableName: process.env.DYNAMODB_TABLE,
+            Key: {
+              pk: 'schedule-' + req.params.sid,
+              sk: 'schedule-' + req.user.email
+            },
+            UpdateExpression: 'set image=:image',
+            ExpressionAttributeValues: {
+              ':image': images
+            },
+            ReturnValues: 'UPDATED_NEW'
+          }
+
+          dynamoDb.update(params, (error, result) => {
+            if (error) {
+              console.log(error)
+              res.status(400).json({ error: 'Could not update schedule' })
+            } else {
+              res.json({ status: 'succ', data: result.Attributes, id: req.params.sid })
+            }
+          })
+        }
+      }
+    }
+  })
+})
+
+app.post('/image/:sid', (req, res) => {
+  // 取时刻表， 创建s3 object，更新dynamoDB中sid的image值
+  const params = {
+    TableName: process.env.DYNAMODB_TABLE,
+    KeyConditionExpression: '#pk = :pk',
+    ExpressionAttributeNames: {
+      '#pk': 'pk'
+    },
+    ExpressionAttributeValues: {
+      ':pk': 'schedule-' + req.params.sid
+    }
+  }
+
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get schedule' })
+    } else {
+      if (result.Items.length == 0) {
+        res.status(404).json({ error: 'Schedule does not exist' })
+      } else {
+        images = result.Items[0].image
+        const buf = Buffer.from(req.body.image, 'base64')
+        const tp = fileType(buf.slice(0, 4100))
+        if (tp.mime === 'image/jpeg' || tp.mime === 'image/png') {
+          path = 'upload/' + md5(req.user.email) + '/' + uuid.v1() + '.' + tp.ext
+          images.push(path)
+          const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
+          var s3params = {
+            Bucket: process.env.BUCKET,
+            Key: path,
+            Body: buf,
+            ACL: 'public-read',
+            ContentType: tp.mime
+          }
+          s3bucket.upload(s3params, function(err, data) {
+            if (err) {
+              return res.status(422).json({ error: 'upload to s3 error' })
+            } else {
+              console.log(data)
+              const params = {
+                TableName: process.env.DYNAMODB_TABLE,
+                Key: {
+                  pk: 'schedule-' + req.params.sid,
+                  sk: 'schedule-' + req.user.email
+                },
+                UpdateExpression: 'set image=:image',
+                ExpressionAttributeValues: {
+                  ':image': images
+                },
+                ReturnValues: 'UPDATED_NEW'
+              }
+
+              dynamoDb.update(params, (error, result) => {
+                if (error) {
+                  console.log(error)
+                  res.status(400).json({ error: 'Could not update schedule' })
+                } else {
+                  res.json({ status: 'succ', data: result.Attributes, id: req.params.sid })
+                }
+              })
+            }
+          })
+        } else {
+          return res.status(422).json({ erro: 'mime type error' })
+        }
+      }
+    }
+  })
+})
 //[check('lat').isFloat(), check('lon').isFloat(), check('tz').isInt()],
 app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz').isInt()], (req, res) => {
   const errors = validationResult(req)
@@ -149,17 +298,50 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
 app.delete('/schedule/:sid', (req, res) => {
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
-    Key: {
-      pk: 'schedule-' + req.params.sid,
-      sk: 'schedule-' + req.user.email
+    KeyConditionExpression: '#pk = :pk',
+    ExpressionAttributeNames: {
+      '#pk': 'pk'
+    },
+    ExpressionAttributeValues: {
+      ':pk': 'schedule-' + req.params.sid
     }
   }
 
-  dynamoDb.delete(params, function(err, result) {
-    if (err) {
-      res.status(400).json({ error: 'Could not delete schedule' })
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error)
+      res.status(400).json({ error: 'Could not get schedule' })
     } else {
-      res.json({ status: 'succ' })
+      const s3bucket = new AWS.S3({ Bucket: process.env.BUCKET })
+      var s3params = {
+        Bucket: process.env.BUCKET,
+        Delete: {
+          Objects: []
+        }
+      }
+      for (const e of result.Items[0].image) {
+        s3params.Delete.Objects.push({ Key: e })
+      }
+      s3bucket.deleteObjects(s3params, function(err, data) {
+        if (err) console.log(err, err.stack)
+        // an error occurred
+        else console.log(data)
+      })
+      const paramsDel = {
+        TableName: process.env.DYNAMODB_TABLE,
+        Key: {
+          pk: 'schedule-' + req.params.sid,
+          sk: 'schedule-' + req.user.email
+        }
+      }
+
+      dynamoDb.delete(paramsDel, function(err, result) {
+        if (err) {
+          res.status(400).json({ error: 'Could not delete schedule' })
+        } else {
+          res.json({ status: 'succ' })
+        }
+      })
     }
   })
 })

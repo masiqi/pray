@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { getSchedule, updateSchedule } from '@/api/table'
+import { getSchedule, updateSchedule, createImage, deleteImage } from '@/api/table'
 import PrayTimes from 'prayer-times'
 
 export default {
@@ -327,11 +327,13 @@ export default {
       var reader = new FileReader()
       reader.readAsDataURL(file.raw)
       reader.onload = function(e) {
-        This.form.image = this.result.split(',')[1]
+        createImage(This.$route.params.pk, { image: this.result.split(',')[1] })
       }
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList)
+      console.log(file)
+      var This = this
+      deleteImage(This.$route.params.pk, { url: file.url })
     },
     beforeRemove(file, fileList) {
       return this.$confirm(`确定移除 ${file.name}？`)

@@ -24,6 +24,22 @@ export function updateSchedule(data, params) {
   })
 }
 
+export function createImage(data, params) {
+  return request({
+    url: '/image/' + data,
+    method: 'post',
+    data: params
+  })
+}
+
+export function deleteImage(data, params) {
+  return request({
+    url: '/image/' + data,
+    method: 'delete',
+    data: params
+  })
+}
+
 export function deleteSchedule(data) {
   return request({
     url: '/schedule/' + data,
