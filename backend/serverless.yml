@@ -27,7 +27,7 @@ provider:
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
     JWT_KEY: ${file(config.${opt:stage, self:provider.stage}.yml):jwt-token}
-    BUCKET: brick-matrix
+    BUCKET: pray-wiki
     CDN: https://pray.wiki/
   iamRoleStatements:
     - Effect: Allow
