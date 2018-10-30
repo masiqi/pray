@@ -282,7 +282,7 @@ app.post('/schedule', [check('lat').isFloat(), check('lon').isFloat(), check('tz
       isha_fixed: req.body.isha_fixed || 0
     }
   }
-  if (path !== '') {
+  if (pathList.length !== 0) {
     params.Item.image = pathList
   }
 

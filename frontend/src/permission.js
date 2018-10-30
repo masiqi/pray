@@ -17,8 +17,12 @@ router.beforeEach((to, from, next) => {
     if (whiteList.indexOf(to.path) !== -1) {
       next()
     } else {
-      next(`/login?redirect=${to.path}`) // 否则全部重定向到登录页
-      NProgress.done()
+      if (to.path.startsWith('/show')) {
+        next()
+      } else {
+        next(`/login?redirect=${to.path}`) // 否则全部重定向到登录页
+        NProgress.done()
+      }
     }
   }
 })
